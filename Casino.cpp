@@ -5,89 +5,126 @@
 
 using namespace std;
 
-void rules();
+void displayWelcomeMessage();
+void displayRules();
+void playGame(string playerName, int& balance);
+bool isValidBet(int betAmount, int balance);
+int getUserGuess();
+int rollDice();
+void displayResult(string playerName, int guess, int dice, int betAmount, int& balance);
+void displayFinalBalance(int& balance);
 
-int main() 
-{
+int main() {
     string playerName;
-    
     int balance;
-    int bettingAmount;
-    int guess;
-    int dice;
-    
-    char choice;
 
     srand(time(0));
 
-    cout << "\n\t\t========WELCOME TO CASINO WORLD=======\n\n";
-    cout << "\n\nWhat's your Name : ";
-
+    displayWelcomeMessage();
+    cout << "What's your name? ";
     getline(cin, playerName);
 
-    cout << "\n\nEnter the starting balance to play game : $";
+    cout << "Enter the starting balance to play the game: $";
     cin >> balance;
-    
-  do
-    {
-        system("cls");
-        rules();
-        cout << "\n\nYour current balance is $ " << balance << "\n";
 
-        do
-        {
-            cout << "Hey, " << playerName<<", enter amount to bet : $";
-            cin >> bettingAmount;
+    playGame(playerName, balance);
 
-            if(bettingAmount > balance)
-                cout << "Betting balance can't be more than current balance!\n"
-                       <<"\nRe-enter balance\n ";
-
-        }while(bettingAmount > balance);
-
-        do
-        {
-            cout << "Guess any betting number between 1 & 10 :";
-            cin >> guess;
-
-            if(guess <= 0 || guess > 10)
-                cout << "\nNumber should be between 1 to 10\n"
-                    <<"Re-enter number:\n ";
-
-        }while(guess <= 0 || guess > 10);
-        dice = rand()%10 + 1;
-
-        if(dice == guess)
-        {
-            cout << "\n\nYou are in luck!! You have won Rs." << bettingAmount * 10;
-            balance = balance + bettingAmount * 10;
-        }
-        else
-        {
-            cout << "Oops, better luck next time !! You lost $ "<< bettingAmount <<"\n";
-            balance = balance - bettingAmount;
-        }
-        cout << "\nThe winning number was : " << dice <<"\n";
-        cout << "\n"<<playerName<<", You have balance of $ " << balance << "\n";
-
-        if(balance == 0)
-        {
-            cout << "You have no money to play ";
-            break;
-        }
-        cout << "\n\n-->Do you want to play again (y/n)? ";
-        cin >> choice;
-        
-    }while(choice =='Y'|| choice=='y');
-    cout << "\n\n\n";
-    cout << "\n\nThanks for playing the game. Your balance is $ " << balance << "\n\n";
     return 0;
 }
-void rules()
-{
-    system("cls");
+
+void displayWelcomeMessage() {
+    cout << "\n\t\t========WELCOME TO CASINO WORLD=======\n\n";
+}
+
+void displayRules() {
     cout << "\t\t======CASINO NUMBER GUESSING RULES!======\n";
     cout << "\t1. Choose a number between 1 to 10\n";
     cout << "\t2. Winner gets 10 times of the money bet\n";
     cout << "\t3. Wrong bet, and you lose the amount you bet\n\n";
+}
+
+void playGame(string playerName, int& balance) {
+    char choice;
+
+    do {
+        system("cls");
+        displayRules();
+        cout << "\n\nYour current balance is: $" << balance << "\n";
+
+        int betAmount;
+        do {
+            cout << "Hey, " << playerName << ", enter amount to bet: $";
+            cin >> betAmount;
+        } while (!isValidBet(betAmount, balance));
+
+        int guess = getUserGuess();
+        int dice = rollDice();
+        displayResult(playerName, guess, dice, betAmount, balance);
+
+        if (balance == 0) {
+            displayFinalBalance(balance);
+            if (balance == 0) {
+                cout << "You have no money left to play.\n";
+                break;
+            }
+        }
+
+        cout << "\n\nDo you want to play again (y/n)? ";
+        cin >> choice;
+
+    } while (choice == 'Y' || choice == 'y');
+
+    displayFinalBalance(balance);
+}
+
+bool isValidBet(int betAmount, int balance) {
+    if (betAmount <= 0) {
+        cout << "Bet amount should be greater than 0. Please re-enter.\n";
+        return false;
+    } else if (betAmount > balance) {
+        cout << "Betting amount cannot be more than your current balance. Please re-enter.\n";
+        return false;
+    }
+    return true;
+}
+
+int getUserGuess() {
+    int guess;
+    do {
+        cout << "Guess any number between 1 & 10: ";
+        cin >> guess;
+    } while (guess <= 0 || guess > 10);
+    return guess;
+}
+
+int rollDice() {
+    return rand() % 10 + 1;
+}
+
+void displayResult(string playerName, int guess, int dice, int betAmount, int& balance) {
+    cout << "The winning number was: " << dice << "\n";
+    if (dice == guess) {
+        cout << "Congratulations! You have won $" << betAmount * 10 << "\n";
+        balance += betAmount * 10;
+    } else {
+        cout << "Better luck next time! You lost $" << betAmount << "\n";
+        balance -= betAmount;
+    }
+    cout << playerName << ", your balance is: $" << balance << "\n";
+}
+
+void displayFinalBalance(int& balance) {
+    cout << "\n\nThanks for playing the game. Your final balance is: $" << balance << "\n\n";
+    if (balance == 0) {
+        char addMore;
+        cout << "Your balance is 0. Do you want to add more money to continue playing? (y/n): ";
+        cin >> addMore;
+        if (addMore == 'Y' || addMore == 'y') {
+            cout << "Enter the amount you want to add: $";
+            int addAmount;
+            cin >> addAmount;
+            balance += addAmount;
+            cout << "You have added $" << addAmount << ". Your current balance is: $" << balance << endl;
+        }
+    }
 }
